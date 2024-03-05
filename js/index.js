@@ -48,7 +48,7 @@ function createMovieCard(movie) {
   //syntax of obj property exactly same as provided by API
   const { poster_path, original_title, release_date, overview } = movie;
 
-  const imagePath = poster_path ? imgAPI : "./img-01.jpeg";
+  const imagePath = poster_path ? imgAPI + poster_path : "./img-01.jpeg";
 
   const truncatedTitle =
     original_title.length > 15
