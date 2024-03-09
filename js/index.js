@@ -1,38 +1,52 @@
-//setup config for API
-//in a full stack app -- save api keys in a dot env file for more security!
-const APIKey = "1ce10f690d0686f50d424eb6f57e6c97";
-const imgAPI = "https://image.tmdb.org/t/p/w1280";
-const searchURL = `https://api.themoviedb.org/3/search/movie?api_key=${APIKey}&query=`;
+/*
+goto : https://www.themoviedb.org/
+signup: https://www.themoviedb.org/signup
+verify your email id and then sign in 
+on landing page, left click on your profile icon (to the left of the search icon)
+    then click on edit profile
+In new page, from left side vertical menu, click on API menu option
+Under the Request an API Key - click to create. 
+Choose Developer option 
+Accept Terms and COnditions 
+Give a name like - MovieDBDemo
+URL: https://localhost:80
+give some summary
+give your contact information
+https://developer.themoviedb.org/docs/
+*/
 
-// connect input forms and child fields from html to js
+// setup configuration ~ typically will be done in the backend
+const APIKey = "25c97c3c0d35cf690fe095069c3d340b";
+// console.log(APIKey);
+const imgApi = "https://image.tmdb.org/t/p/w1280";
+const searchUrl = `https://api.themoviedb.org/3/search/movie?api_key=${APIKey}&query=`;
+
+// get form element from html
 const form = document.getElementById("search-form");
-
-//for user query
+// get user search input
 const query = document.getElementById("search-input");
 
-//html element where results needs to be embedded
+// grab the html container where results will be published
 const result = document.getElementById("result");
 
-//control variables
+// logic
 let page = 1;
 let isSearching = false;
 
-//implement logic of various functionalities
-
-//fetch initial data from API on page load
+// get JSON data from url
 async function fetchData(url) {
   try {
     const response = await fetch(url);
     if (!response.ok) {
-      throw new Error("Movie not found. Please Search again...");
+      throw new Error("Ruhh oh.. something went wrong. check your url...");
     }
-    return await response.json(); //converted to json format (i.e. key value pair for object metadata)
+    return await response.json();
   } catch (err) {
-    return null; //create your own error handling logic
+    return null;
   }
 }
 
-//show data after fetching it
+// Get and show results based on previous url fetch
 async function fetchAndShowResult(url) {
   const data = await fetchData(url);
   if (data && data.results) {
@@ -40,62 +54,59 @@ async function fetchAndShowResult(url) {
   }
 }
 
-//dynamic content generation using JS code
+// create dynamic movie display cards - similar to the product cards you all did in assignment
 function createMovieCard(movie) {
-  //extract different objects from data returned by API
-  //for this you need to know metadata of return set from API
-  //new concepts - object destructuring in JS
-  //syntax of obj property exactly same as provided by API
+  // destructuring an obj - access obj property like a variable name without using obj name and dot operator
+  // If using JSON data from an API like in this case, make sure to name them exactly the way the API does.
   const { poster_path, original_title, release_date, overview } = movie;
 
-  const imagePath = poster_path ? imgAPI + poster_path : "./img-01.jpeg";
+  const imagePath = poster_path ? imgApi + poster_path : "./img-01.jpeg";
 
   const truncatedTitle =
     original_title.length > 15
-      ? original_title.slice(0, 14) + "..."
+      ? original_title.slice(0, 15) + "..."
       : original_title;
 
-  const formattedDate = release_date || "No release date available...";
+  const formattedDate = release_date || "No release date";
 
-  //creation of dynamic content in html format
   const cardTemplate = `
-        <div class="column">
-            <div class="card">
-                <a class="card-media" href="./img-01.jpeg"><img src="${imagePath}" alt="${original_title}" width=100% />
-                </a>
-                <div class="card-content">
-                    <div class="card-header">
-                        <div class="left-content">
-                            <h3 style="font-weight: 600">${truncatedTitle}</h3>
-                            <span style="color:#12efec">${formattedDate}</span>
-                        </div>
-                        <div class="right-content">
-                            <a href="${imagePath}" target="_blank" class="card-btn"> See Cover </a>
-                        </div>
+    <div class="column">
+        <div class="card">
+            <a class="card-media" href="./img-01.jpeg">
+                <img src="${imagePath}" alt="${original_title}" width="100%" />
+            </a>
+            <div class="card-content">
+                <div class="card-header">
+                    <div class="left-content">
+                        <h3 style="font-weight: 600">${truncatedTitle}</h3>
+                        <span style="color: #12efec">${formattedDate}</span>
                     </div>
-                    <div class="info">
-                        ${overview || "No overview available..."}
+                    <div class="right-content">
+                        <a href="${imagePath}" target="_blank" class="card-btn"> See Cover </a>
                     </div>
+                </div>
+                <div class="info">
+                    ${overview || "No overview available..."}
                 </div>
             </div>
         </div>
-    `;
-
+    </div>
+  `;
   return cardTemplate;
 }
 
-//reset page upon new user search
+// clear result output for search
 function clearResults() {
   result.innerHTML = "";
 }
 
-//display the dynamic content with movie results
+// display results on the page
 function showResults(item) {
-  const newContent = item.map(createMovieCard).join(""); //.join for space between cards
-  result.innerHTML += newContent || "<p> No Results Found. Search Again. </p>";
+  const newContent = item.map(createMovieCard).join("");
+  result.innerHTML += newContent || "<p> No Results Found. Search again. </p>";
 }
 
-//load more results functionality
+// Load more results
 async function loadMoreResults() {
   if (isSearching) {
     return;
@@ -103,40 +114,43 @@ async function loadMoreResults() {
   page++;
   const searchTerm = query.value;
   const url = searchTerm
-    ? `${searchURL}${searchTerm}&page=${page}`
+    ? `${searchUrl}${searchTerm}&page=${page}`
     : `https://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=${APIKey}&page=${page}`;
-
   await fetchAndShowResult(url);
 }
 
-//detect the end of the page to load more results
+// detect end of page and load more results
 function detectEnd() {
   const { scrollTop, clientHeight, scrollHeight } = document.documentElement;
-
-  if (scrollTop + clientHeight <= scrollHeight - 20) {
+  if (scrollTop + clientHeight >= scrollHeight - 20) {
     loadMoreResults();
   }
 }
 
-//functionality to hand search operations
-//input param - event parameter
+// Handle search operation
+// input param - event parameter
 async function handleSearch(e) {
+  console.log("debug inside handleSearch function...");
+  // prevent form from resetting when submit is clicked
+  e.preventDefault();
   const searchTerm = query.value.trim();
+  console.log(`input term by user is ${searchTerm}`);
   if (searchTerm) {
     isSearching = true;
     clearResults();
-    const newURL = `${searchURL}${searchTerm}&page=${page}`;
-    await fetchAndShowResult(newURL);
+    const newUrl = `${searchUrl}${searchTerm}&page=${page}`;
+    await fetchAndShowResult(newUrl);
     query.value = "";
   }
 }
 
-//create our event listeners
+// create event listeners and associate them to the function logic to be executed when detected on the page
+// note - while specifying/calling the function here, we do nt include the first brackets.
 form.addEventListener("submit", handleSearch);
 window.addEventListener("scroll", detectEnd);
 window.addEventListener("resize", detectEnd);
 
-//main function / to init and call all other pending functions above
+// initialize the page
 async function init() {
   clearResults();
   const url = `https://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=${APIKey}&page=${page}`;
@@ -144,5 +158,4 @@ async function init() {
   await fetchAndShowResult(url);
 }
 
-//call init function
 init();

@@ -2,18 +2,22 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Movie DB clone</title>
+    <title>Movie App Demo</title>
 
-    <!--css-->
+    <!-- CSS -->
     <link rel="stylesheet" href="./css/style.css" />
-    <!--js (defer to not load until later)-->
+
+    <!-- link JS file and defer its load i.e. loads after html contents gets rendered -->
     <script src="./js/index.js" defer></script>
   </head>
   <body>
     <div class="container">
       <div class="search-box">
-        <a href="#"><h1>Movie Database API Demo</h1></a>
+        <a href="#">
+          <h1>Movie Database API Demo</h1>
+        </a>
         <form id="search-form">
           <input
             type="text"
@@ -23,8 +27,9 @@
           <button type="submit" class="search-btn">Search</button>
         </form>
       </div>
-      <!--reached stratic content breakpoint-->
-      <!--create container for dynamic content below-->
+      <!-- Reached breakpoint - style this -->
+
+      <!-- innerHTML of the following block will be dynamically geenrated through JS  -->
       <div id="result"></div>
     </div>
   </body>
